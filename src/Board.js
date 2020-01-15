@@ -1,50 +1,47 @@
 import React from "react";
 import Square from "./Square";
 import calculateWinner from "./utils/calculateWinner";
+import { clickAction, gameWin } from "./redux/actions";
 
 class Board extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(9).fill(""),
-      isXNext: true,
-      isWin: false
-    };
-  }
-
   handleClick = i => {
-    const squares = [...this.state.squares];
+    const squares = [...this.props.store.getState().squares];
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    squares[i] = this.state.isXNext ? "X" : "O";
-    this.setState(state => ({ isXNext: !state.isXNext, squares }));
+    squares[i] = this.props.store.getState().isXNext ? "X" : "O";
+    this.props.store.dispatch(clickAction(squares));
+
     if (calculateWinner(squares)) {
-      this.setState(() => ({ isWin: true }));
+      this.props.store.dispatch(gameWin());
     }
   };
 
   renderSquare = index => {
     return (
       <Square
-        handleClick={this.state.isWin ? null : () => this.handleClick(index)}
-        content={this.state.squares[index]}
+        handleClick={
+          this.props.store.getState().isWin
+            ? null
+            : () => this.handleClick(index)
+        }
+        content={this.props.store.getState().squares[index]}
       />
     );
   };
 
   componentDidUpdate() {
-    if (this.state.isWin) {
+    if (this.props.store.getState().isWin) {
       setTimeout(() => {
-        alert(`${this.state.isXNext ? "O" : "X"}`);
+        alert(`Winner is ${this.props.store.getState().isXNext ? "O" : "X"}`);
       }, 200);
     }
   }
 
   render() {
-    const status = this.state.isWin
-      ? `Winner is ${this.state.isXNext ? "O" : "X"}`
-      : `Next Player :${this.state.isXNext ? "X" : "O"}`;
+    const status = this.props.store.getState().isWin
+      ? `Winner is ${this.props.store.getState().isXNext ? "O" : "X"}`
+      : `Next Player :${this.props.store.getState().isXNext ? "X" : "O"}`;
     return (
       <div>
         <div className="status">{status}</div>
