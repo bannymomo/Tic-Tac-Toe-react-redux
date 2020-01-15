@@ -1,47 +1,44 @@
 import React from "react";
+import { connect } from "react-redux";
 import Square from "./Square";
 import calculateWinner from "./utils/calculateWinner";
 import { clickAction, gameWin } from "./redux/actions";
 
 class Board extends React.Component {
   handleClick = i => {
-    const squares = [...this.props.store.getState().squares];
+    const squares = [...this.props.squares];
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    squares[i] = this.props.store.getState().isXNext ? "X" : "O";
-    this.props.store.dispatch(clickAction(squares));
+    squares[i] = this.props.isXNext ? "X" : "O";
+    this.props.clickAction(squares);
 
     if (calculateWinner(squares)) {
-      this.props.store.dispatch(gameWin());
+      this.props.gameWin();
     }
   };
 
   renderSquare = index => {
     return (
       <Square
-        handleClick={
-          this.props.store.getState().isWin
-            ? null
-            : () => this.handleClick(index)
-        }
-        content={this.props.store.getState().squares[index]}
+        handleClick={this.props.isWin ? null : () => this.handleClick(index)}
+        content={this.props.squares[index]}
       />
     );
   };
 
   componentDidUpdate() {
-    if (this.props.store.getState().isWin) {
+    if (this.props.isWin) {
       setTimeout(() => {
-        alert(`Winner is ${this.props.store.getState().isXNext ? "O" : "X"}`);
+        alert(`Winner is ${this.props.isXNext ? "O" : "X"}`);
       }, 200);
     }
   }
 
   render() {
-    const status = this.props.store.getState().isWin
-      ? `Winner is ${this.props.store.getState().isXNext ? "O" : "X"}`
-      : `Next Player :${this.props.store.getState().isXNext ? "X" : "O"}`;
+    const status = this.props.isWin
+      ? `Winner is ${this.props.isXNext ? "O" : "X"}`
+      : `Next Player :${this.props.isXNext ? "X" : "O"}`;
     return (
       <div>
         <div className="status">{status}</div>
@@ -64,5 +61,15 @@ class Board extends React.Component {
     );
   }
 }
+const mapStateToProps = state => ({
+  isXNext: state.board.isXNext,
+  squares: state.board.squares,
+  isWin: state.board.isWin
+});
 
-export default Board;
+const mapDispatchToProps = dispatch => ({
+  gameWin: () => dispatch(gameWin()),
+  clickAction: squares => dispatch(clickAction(squares))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Board);

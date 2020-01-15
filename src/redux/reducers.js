@@ -1,4 +1,5 @@
 import { CLICK, WIN } from "./action-types";
+import { combineReducers } from "redux";
 
 const intialState = {
   squares: Array(9).fill(null),
@@ -25,4 +26,6 @@ const board = (state = intialState, action) => {
   }
 };
 
-export default board;
+export default combineReducers({
+  board
+});
